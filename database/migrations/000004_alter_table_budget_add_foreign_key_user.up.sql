@@ -1,0 +1,1 @@
+ALTER TABLE budget ADD CONSTRAINT fk_user_budget FOREIGN KEY (user_id) REFERENCES users(user_id);
