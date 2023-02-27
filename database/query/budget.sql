@@ -26,3 +26,7 @@ SET
 deleted_at = NOW(),
 deleted_by = $1
 WHERE user_id = $2;
+
+-- name: GetBudgetByID :one
+SELECT * FROM budget
+WHERE id = $1;

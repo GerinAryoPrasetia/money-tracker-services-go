@@ -30,6 +30,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.deleteBudgetStmt, err = db.PrepareContext(ctx, deleteBudget); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteBudget: %w", err)
 	}
+	if q.getBudgetByIDStmt, err = db.PrepareContext(ctx, getBudgetByID); err != nil {
+		return nil, fmt.Errorf("error preparing query GetBudgetByID: %w", err)
+	}
 	if q.getBudgetByUserIDStmt, err = db.PrepareContext(ctx, getBudgetByUserID); err != nil {
 		return nil, fmt.Errorf("error preparing query GetBudgetByUserID: %w", err)
 	}
@@ -49,6 +52,11 @@ func (q *Queries) Close() error {
 	if q.deleteBudgetStmt != nil {
 		if cerr := q.deleteBudgetStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deleteBudgetStmt: %w", cerr)
+		}
+	}
+	if q.getBudgetByIDStmt != nil {
+		if cerr := q.getBudgetByIDStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getBudgetByIDStmt: %w", cerr)
 		}
 	}
 	if q.getBudgetByUserIDStmt != nil {
@@ -102,6 +110,7 @@ type Queries struct {
 	tx                    *sql.Tx
 	createBudgetStmt      *sql.Stmt
 	deleteBudgetStmt      *sql.Stmt
+	getBudgetByIDStmt     *sql.Stmt
 	getBudgetByUserIDStmt *sql.Stmt
 	getListBudgetStmt     *sql.Stmt
 }
@@ -112,6 +121,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		tx:                    tx,
 		createBudgetStmt:      q.createBudgetStmt,
 		deleteBudgetStmt:      q.deleteBudgetStmt,
+		getBudgetByIDStmt:     q.getBudgetByIDStmt,
 		getBudgetByUserIDStmt: q.getBudgetByUserIDStmt,
 		getListBudgetStmt:     q.getListBudgetStmt,
 	}

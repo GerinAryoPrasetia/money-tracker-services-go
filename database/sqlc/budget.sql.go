@@ -73,6 +73,29 @@ func (q *Queries) DeleteBudget(ctx context.Context, arg DeleteBudgetParams) erro
 	return err
 }
 
+const getBudgetByID = `-- name: GetBudgetByID :one
+SELECT id, user_id, amount, description, created_at, created_by, updated_at, updated_by, deleted_by, deleted_at FROM budget
+WHERE id = $1
+`
+
+func (q *Queries) GetBudgetByID(ctx context.Context, id string) (Budget, error) {
+	row := q.queryRow(ctx, q.getBudgetByIDStmt, getBudgetByID, id)
+	var i Budget
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Amount,
+		&i.Description,
+		&i.CreatedAt,
+		&i.CreatedBy,
+		&i.UpdatedAt,
+		&i.UpdatedBy,
+		&i.DeletedBy,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
 const getBudgetByUserID = `-- name: GetBudgetByUserID :one
 SELECT id, user_id, amount, description, created_at, created_by, updated_at, updated_by, deleted_by, deleted_at FROM budget
 WHERE user_id = $1 AND deleted_at <> null LIMIT 1
