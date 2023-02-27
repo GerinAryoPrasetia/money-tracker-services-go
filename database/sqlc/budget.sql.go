@@ -3,7 +3,7 @@
 //   sqlc v1.17.0
 // source: budget.sql
 
-package db
+package database
 
 import (
 	"context"

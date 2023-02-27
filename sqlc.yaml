@@ -1,6 +1,6 @@
 version: '1'
 packages:
-  - name: 'db'
+  - name: 'database'
     path: './database/sqlc'
     queries: './database/query'
     schema: './database/migrations'
