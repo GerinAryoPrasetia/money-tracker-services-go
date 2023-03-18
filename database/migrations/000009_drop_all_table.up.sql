@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS category_tag;
+DROP TABLE IF EXISTS budget;
+DROP TABLE IF EXISTS users;
+
