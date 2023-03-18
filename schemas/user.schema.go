@@ -1,0 +1,9 @@
+package schemas
+
+type CreateUser struct {
+	Name     string `json:"name" binding:"required"`
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+//TODO: add unique constraint users

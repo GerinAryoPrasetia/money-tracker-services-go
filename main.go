@@ -1,30 +1,75 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
-	"os"
+	"net/http"
 
-	"github.com/joho/godotenv"
+	"github.com/GerinAryoPrasetia/go-money-tracking-services/config"
+	"github.com/GerinAryoPrasetia/go-money-tracking-services/controllers"
+	dbConn "github.com/GerinAryoPrasetia/go-money-tracking-services/database/sqlc"
+	"github.com/GerinAryoPrasetia/go-money-tracking-services/routes"
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 )
 
+var (
+	server *gin.Engine
+	db     *dbConn.Queries
+	ctx    context.Context
+
+	UserController controllers.UserController
+	UserRoutes     routes.UserRoutes
+)
+
+func init() {
+	ctx = context.TODO()
+	config, err := config.LoadConfig(".")
+
+	if err != nil {
+		log.Fatalf("could not load config: %v", err)
+	}
+
+	conn, err := sql.Open(config.PostgreDriver, config.PostgresSource)
+	if err != nil {
+		log.Fatalf("could not connect to postgres database: %v", err)
+	}
+
+	db = dbConn.New(conn)
+
+	fmt.Println("PostgreSQL connected successfully...")
+
+	UserController = *controllers.NewUserController(db, ctx)
+	UserRoutes = routes.NewRouteUser(UserController)
+
+	server = gin.Default()
+}
+
 func main() {
-	err := godotenv.Load()
+	config, err := config.LoadConfig(".")
+
 	if err != nil {
-		log.Fatal("error loading .env files")
+		log.Fatalf("could not load config: %v", err)
 	}
 
-	dbName := os.Getenv("DB_NAME")
-	dbPassword := os.Getenv("DB_PASSWORD")
-	dbUsername := os.Getenv("DB_USERNAME")
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowOrigins = []string{config.Origin}
+	corsConfig.AllowCredentials = true
 
-	conn := fmt.Sprintf("postgresql://%s:%s@localhost:5432/%s?sslmode=disable", dbUsername, dbPassword, dbName)
-	db, err := sql.Open("postgres", conn)
-	if err != nil {
-		log.Fatal(err)
-	}
+	server.Use(cors.New(corsConfig))
 
-	defer db.Close()
+	router := server.Group("/api")
+
+	router.GET("/healthchecker", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "money tracker app services"})
+	})
+
+	UserRoutes.UserRoutes(router)
+	server.NoRoute(func(ctx *gin.Context) {
+		ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": fmt.Sprintf("Route %s not found", ctx.Request.URL)})
+	})
+	log.Fatal(server.Run(":" + config.ServerPort))
 }

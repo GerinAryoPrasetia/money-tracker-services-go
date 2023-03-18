@@ -24,49 +24,17 @@ func New(db DBTX) *Queries {
 func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	q := Queries{db: db}
 	var err error
-	if q.createBudgetStmt, err = db.PrepareContext(ctx, createBudget); err != nil {
-		return nil, fmt.Errorf("error preparing query CreateBudget: %w", err)
-	}
-	if q.deleteBudgetStmt, err = db.PrepareContext(ctx, deleteBudget); err != nil {
-		return nil, fmt.Errorf("error preparing query DeleteBudget: %w", err)
-	}
-	if q.getBudgetByIDStmt, err = db.PrepareContext(ctx, getBudgetByID); err != nil {
-		return nil, fmt.Errorf("error preparing query GetBudgetByID: %w", err)
-	}
-	if q.getBudgetByUserIDStmt, err = db.PrepareContext(ctx, getBudgetByUserID); err != nil {
-		return nil, fmt.Errorf("error preparing query GetBudgetByUserID: %w", err)
-	}
-	if q.getListBudgetStmt, err = db.PrepareContext(ctx, getListBudget); err != nil {
-		return nil, fmt.Errorf("error preparing query GetListBudget: %w", err)
+	if q.createUserStmt, err = db.PrepareContext(ctx, createUser); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateUser: %w", err)
 	}
 	return &q, nil
 }
 
 func (q *Queries) Close() error {
 	var err error
-	if q.createBudgetStmt != nil {
-		if cerr := q.createBudgetStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing createBudgetStmt: %w", cerr)
-		}
-	}
-	if q.deleteBudgetStmt != nil {
-		if cerr := q.deleteBudgetStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing deleteBudgetStmt: %w", cerr)
-		}
-	}
-	if q.getBudgetByIDStmt != nil {
-		if cerr := q.getBudgetByIDStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getBudgetByIDStmt: %w", cerr)
-		}
-	}
-	if q.getBudgetByUserIDStmt != nil {
-		if cerr := q.getBudgetByUserIDStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getBudgetByUserIDStmt: %w", cerr)
-		}
-	}
-	if q.getListBudgetStmt != nil {
-		if cerr := q.getListBudgetStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getListBudgetStmt: %w", cerr)
+	if q.createUserStmt != nil {
+		if cerr := q.createUserStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createUserStmt: %w", cerr)
 		}
 	}
 	return err
@@ -106,23 +74,15 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                    DBTX
-	tx                    *sql.Tx
-	createBudgetStmt      *sql.Stmt
-	deleteBudgetStmt      *sql.Stmt
-	getBudgetByIDStmt     *sql.Stmt
-	getBudgetByUserIDStmt *sql.Stmt
-	getListBudgetStmt     *sql.Stmt
+	db             DBTX
+	tx             *sql.Tx
+	createUserStmt *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                    tx,
-		tx:                    tx,
-		createBudgetStmt:      q.createBudgetStmt,
-		deleteBudgetStmt:      q.deleteBudgetStmt,
-		getBudgetByIDStmt:     q.getBudgetByIDStmt,
-		getBudgetByUserIDStmt: q.getBudgetByUserIDStmt,
-		getListBudgetStmt:     q.getListBudgetStmt,
+		db:             tx,
+		tx:             tx,
+		createUserStmt: q.createUserStmt,
 	}
 }
