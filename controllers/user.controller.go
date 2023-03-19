@@ -23,7 +23,6 @@ func NewUserController(db *db.Queries, ctx context.Context) *UserController {
 	return &UserController{db, ctx}
 }
 
-//TODO: add other function
 func (uc *UserController) CreateUser(ctx *gin.Context) {
 	var payload *schemas.CreateUser
 
@@ -50,7 +49,7 @@ func (uc *UserController) CreateUser(ctx *gin.Context) {
 		UpdatedBy: sql.NullString{String: payload.Email, Valid: true},
 	}
 
-	userId, err := uc.db.CreateUser(ctx, *args)
+	user, err := uc.db.CreateUser(ctx, *args)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{
@@ -60,9 +59,16 @@ func (uc *UserController) CreateUser(ctx *gin.Context) {
 		return
 	}
 
+	userToken, err := pkg.GenerateJWT(user.ID, user.Email, user.Name)
+	if err != nil {
+		//TODO : Logger
+		return
+	}
+
 	ctx.JSON(http.StatusCreated, gin.H{
 		"status": "success",
-		"data":   userId,
+		"data":   user.ID,
+		"token":  userToken,
 	})
 }
 
@@ -97,4 +103,15 @@ func (uc *UserController) Login(ctx *gin.Context) {
 		return
 	}
 
+	userToken, err := pkg.GenerateJWT(user.ID, user.Email, user.Name)
+	if err != nil {
+		//TODO : Logger
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"status": "success",
+		"data":   user.ID,
+		"token":  userToken,
+	})
 }

@@ -21,7 +21,7 @@ INSERT INTO users (
 ) VALUES (
     $1, $2, $3, $4, $5, $6
 )
-RETURNING id
+RETURNING id, name, email, password, created_at, created_by, updated_at, updated_by
 `
 
 type CreateUserParams struct {
@@ -33,7 +33,7 @@ type CreateUserParams struct {
 	UpdatedBy sql.NullString `json:"updated_by"`
 }
 
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (string, error) {
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
 	row := q.queryRow(ctx, q.createUserStmt, createUser,
 		arg.ID,
 		arg.Name,
@@ -42,9 +42,18 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (string,
 		arg.CreatedBy,
 		arg.UpdatedBy,
 	)
-	var id string
-	err := row.Scan(&id)
-	return id, err
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.Password,
+		&i.CreatedAt,
+		&i.CreatedBy,
+		&i.UpdatedAt,
+		&i.UpdatedBy,
+	)
+	return i, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one

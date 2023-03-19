@@ -8,6 +8,8 @@ type Config struct {
 	ServerPort     string `mapstructure:"SERVER_PORT"`
 	ClientPort     string `mapstructure:"CLIENT_PORT"`
 	Origin         string `mapstructure:"ORIGIN"`
+
+	JWTSecretKey string `mapstructure:"JWT_SECRET_KEY"`
 }
 
 func LoadConfig(path string) (config Config, err error) {
