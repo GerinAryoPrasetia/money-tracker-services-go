@@ -87,7 +87,7 @@ func (uc *UserController) Login(ctx *gin.Context) {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusBadRequest, gin.H{
-				"status":  "users not found",
+				"status":  "invalid email or password",
 				"success": "false",
 			})
 			return
@@ -97,7 +97,7 @@ func (uc *UserController) Login(ctx *gin.Context) {
 	hashPass := pkg.CheckPasswordHash(payload.Password, user.Password)
 	if !hashPass {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"status":  "password not match",
+			"status":  "invalid email or password",
 			"success": "false",
 		})
 		return
