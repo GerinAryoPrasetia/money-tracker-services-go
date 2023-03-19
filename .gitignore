@@ -24,3 +24,5 @@ go.work
 .env
 Makefile
 app.env
+tmp/
+notes.md

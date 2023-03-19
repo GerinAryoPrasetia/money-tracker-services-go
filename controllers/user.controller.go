@@ -65,3 +65,36 @@ func (uc *UserController) CreateUser(ctx *gin.Context) {
 		"data":   userId,
 	})
 }
+
+func (uc *UserController) Login(ctx *gin.Context) {
+	var payload *schemas.Login
+
+	if err := ctx.ShouldBindJSON(&payload); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"status":  "invalid json payload",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	user, err := uc.db.GetUserByEmail(ctx, payload.Email)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"status":  "users not found",
+				"success": "false",
+			})
+			return
+		}
+	}
+
+	hashPass := pkg.CheckPasswordHash(payload.Password, user.Password)
+	if !hashPass {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"status":  "password not match",
+			"success": "false",
+		})
+		return
+	}
+
+}
